@@ -7,7 +7,6 @@ import com.blogger.data.mappers.EmployeeMapper;
 import com.blogger.jooq.tables.pojos.Employees;
 import io.reactivex.rxjava3.core.Single;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +19,6 @@ import java.util.stream.Collectors;
 public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
-    @Autowired
     private final EmployeeMapper employeeMapper;
 
     public List<EmployeeDTO> getAllEmployees() {

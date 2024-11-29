@@ -1,10 +1,10 @@
 package com.blogger.controller;
 
 import com.blogger.data.dtos.EmployeeDTO;
-import com.blogger.service.EmployeeService;
+import com.blogger.service.impl.EmployeeServiceImpl;
 import io.reactivex.rxjava3.core.Single;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,10 +15,13 @@ import java.util.Optional;
 @RestController
 @Slf4j
 @RequestMapping("/employees")
+@RequiredArgsConstructor
 public class EmployeeController {
 
-    @Autowired
-    private EmployeeService employeeService;
+//    @Autowired
+//    private EmployeeService employeeService;
+
+    private final EmployeeServiceImpl employeeService;
 
     // Get all employees
     @GetMapping
@@ -42,12 +45,12 @@ public class EmployeeController {
     }
 
     // Test method to demonstrate enriching an employee
-    @GetMapping("/test/{id}")
-    public Single<EmployeeDTO> testSingle(@PathVariable("id") Integer id) {
-        return employeeService.enrichEmployee(id)
-                .doOnSuccess(employee -> log.info("Successfully enriched employee with ID {}: {}", id, employee))
-                .doOnError(e -> log.error("Error enriching employee with ID {}: {}", id, e.getMessage(), e));
-    }
+//    @GetMapping("/test/{id}")
+//    public Single<EmployeeDTO> testSingle(@PathVariable("id") Integer id) {
+//        return employeeService.enrichEmployee(id)
+//                .doOnSuccess(employee -> log.info("Successfully enriched employee with ID {}: {}", id, employee))
+//                .doOnError(e -> log.error("Error enriching employee with ID {}: {}", id, e.getMessage(), e));
+//    }
 
     // Create a new employee
     @PostMapping
