@@ -1,0 +1,129 @@
+elasticsearch
+
+Kafka
+
+Redis
+
+Docker
+
+Rxjava
+
+-- Lệnh Docker
+# Stage 1: Build the application using Maven
+FROM maven:3.9.5 AS build
+
+# Set the working directory within the container to /app
+WORKDIR /backend
+
+# Copy all files from the current directory (.) to the container's working directory (/app)
+COPY /backend .
+
+# Run the Maven clean install command with the option to skip tests
+RUN mvn clean install -DskipTests
+
+# Stage 2: Create a lightweight container with only the necessary artifacts
+FROM openjdk:17
+
+# Set the working directory within the container to /app
+
+# Copy the built JAR file from the previous stage into the current stage
+COPY --from=build /backend/target/*.jar server.jar
+
+# Expose port 8080 to allow external connections to the application
+EXPOSE 8080
+
+# Specify the command to run when the container starts - run the Java application using the JAR file
+CMD ["java", "-jar", "server.jar"]
+
+
+-- lệnh build images
+docker build -t server:lastest .
+-- lệnh run
+docker run -d -p 8080:8080 backendserver:latest
+
+-- truy cập vào bên trong
+docker exec -it my_backend_server /bin/bash
+
+--Persisting container data
+volumes:
+  sql_data:
+    name: sql_data
+-- network
+-- Docker compose
+docker-compose.yml
+check version :
+version: '3.9'
+
+services:
+  database:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: datn-database
+    ports:
+      - 1445:1433
+    environment:
+      MSSQL_SA_PASSWORD: ComplexP@ssw0rd
+      MSSQL_DATABASE: final
+      ACCEPT_EULA: Y
+    restart: always
+    command: >
+      /bin/bash -c "
+      /opt/mssql/bin/sqlservr &
+
+      echo '>>>>>>>>>> SQL Server is ready - executing init script <<<<<<<<<<';
+      /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'ComplexP@ssw0rd' -C -d master -i /tmp/init-database.sql;
+      /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'ComplexP@ssw0rd' -C -d master -i /tmp/table-database.sql;
+      /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'ComplexP@ssw0rd' -C -d master -i /tmp/extra-database.sql;
+
+      sleep infinity;
+      "
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "ComplexP@ssw0rd", "-Q", "SELECT 1", "-C"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 10s
+    volumes:
+      - ./init-database.sql:/tmp/init-database.sql:ro
+      - ./table-database.sql:/tmp/table-database.sql:ro
+      - ./extra-database.sql:/tmp/extra-database.sql:ro
+    networks:
+      - dev
+
+  server:
+    build:
+      context: .
+      dockerfile: docker/be/Dockerfile
+
+    ports:
+      - 8080:8080
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:sqlserver://database:1433;databaseName=final;encrypt=true;trustServerCertificate=true;
+      SPRING_DATASOURCE_PASSWORD: ComplexP@ssw0rd
+    depends_on:
+      database:
+        condition: service_healthy
+        restart: true
+    networks:
+      - dev
+
+  client:
+    build:
+      context: .
+      dockerfile: docker/fe/Dockerfile
+    ports:
+      - 5173:5173
+    depends_on:
+      - server
+    networks:
+      - dev
+
+networks:
+  dev:
+    driver: bridge
+
+volumes:
+  sql_data:
+    name: sql_data
+docker-compose up -d
+
+
