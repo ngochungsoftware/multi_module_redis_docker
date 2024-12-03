@@ -19,3 +19,5 @@ Docker Image là một mẫu (template) chỉ định cách thức xây dựng m
 Docker Image là immutable (không thể thay đổi) và có thể tái sử dụng nhiều lần để tạo ra các container. Các container, khi được tạo từ một image, là các phiên bản chạy của image đó.
 
 Cấu trúc của Docker Image: Docker Image được tạo từ một tệp tin có tên Dockerfile, chứa các chỉ thị (instructions) hướng dẫn Docker cách tạo ra một image từ cơ sở (base image) và các bước cài đặt các thành phần cần thiết.
+
+Git flow
